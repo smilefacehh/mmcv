@@ -6,6 +6,7 @@ import torch.nn as nn
 from mmengine.registry import MODELS
 
 
+# hard sigmoid 是 sigmoid的近似，不用计算指数，速度更快
 @MODELS.register_module()
 class HSigmoid(nn.Module):
     """Hard Sigmoid Module. Apply the hard sigmoid function:
@@ -26,24 +27,28 @@ class HSigmoid(nn.Module):
         Tensor: The output tensor.
     """
 
-    def __init__(self,
-                 bias: float = 3.0,
-                 divisor: float = 6.0,
-                 min_value: float = 0.0,
-                 max_value: float = 1.0):
+    def __init__(
+        self,
+        bias: float = 3.0,
+        divisor: float = 6.0,
+        min_value: float = 0.0,
+        max_value: float = 1.0,
+    ):
         super().__init__()
         warnings.warn(
-            'In MMCV v1.4.4, we modified the default value of args to align '
-            'with PyTorch official. Previous Implementation: '
-            'Hsigmoid(x) = min(max((x + 1) / 2, 0), 1). '
-            'Current Implementation: '
-            'Hsigmoid(x) = min(max((x + 3) / 6, 0), 1).')
+            "In MMCV v1.4.4, we modified the default value of args to align "
+            "with PyTorch official. Previous Implementation: "
+            "Hsigmoid(x) = min(max((x + 1) / 2, 0), 1). "
+            "Current Implementation: "
+            "Hsigmoid(x) = min(max((x + 3) / 6, 0), 1)."
+        )
         self.bias = bias
         self.divisor = divisor
         assert self.divisor != 0
         self.min_value = min_value
         self.max_value = max_value
 
+    # operator() 会调用这个方法
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = (x + self.bias) / self.divisor
 

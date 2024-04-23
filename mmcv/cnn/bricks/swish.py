@@ -4,6 +4,7 @@ import torch.nn as nn
 from mmengine.registry import MODELS
 
 
+# swish激活函数
 @MODELS.register_module()
 class Swish(nn.Module):
     """Swish Module.

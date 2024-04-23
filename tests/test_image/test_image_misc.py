@@ -11,17 +11,19 @@ except ImportError:
     torch = None
 
 
-# 单元测试指令：pytest test_image_misc.py
-# 指定测试函数：pytest test_image_misc.py -k test_tensor2imgs
-@pytest.mark.skipif(torch is None, reason='requires torch library')
+# 执行单测指令：pytest test_image_misc.py
+# 对某个函数执行单测：pytest test_image_misc.py -k test_tensor2imgs
+@pytest.mark.skipif(torch is None, reason="requires torch library")
 def test_tensor2imgs():
 
-    print(1)
+    # 指令加上 -s 可以打印print内容。-q 简洁打印。
+    print("print test.")
+
+    # 这里断定会触发assert错误，才算测试通过
     # test tensor obj
     with pytest.raises(AssertionError):
         tensor = np.random.rand(2, 3, 3)
-        print(tensor)
-        mmcv.tensor2imgs(tensor)
+        t = mmcv.tensor2imgs(tensor)
 
     # test tensor ndim
     with pytest.raises(AssertionError):
@@ -36,28 +38,29 @@ def test_tensor2imgs():
     # test mean length
     with pytest.raises(AssertionError):
         tensor = torch.randn(2, 3, 5, 5)
-        mmcv.tensor2imgs(tensor, mean=(1, ))
+        mmcv.tensor2imgs(tensor, mean=(1,))
         tensor = torch.randn(2, 1, 5, 5)
         mmcv.tensor2imgs(tensor, mean=(0, 0, 0))
 
     # test std length
     with pytest.raises(AssertionError):
         tensor = torch.randn(2, 3, 5, 5)
-        mmcv.tensor2imgs(tensor, std=(1, ))
+        mmcv.tensor2imgs(tensor, std=(1,))
         tensor = torch.randn(2, 1, 5, 5)
         mmcv.tensor2imgs(tensor, std=(1, 1, 1))
 
     # test to_rgb
     with pytest.raises(AssertionError):
         tensor = torch.randn(2, 1, 5, 5)
-        mmcv.tensor2imgs(tensor, mean=(0, ), std=(1, ), to_rgb=True)
+        mmcv.tensor2imgs(tensor, mean=(0,), std=(1,), to_rgb=True)
 
     # test rgb=True
     tensor = torch.randn(2, 3, 5, 5)
-    gts = [
-        t.cpu().numpy().transpose(1, 2, 0).astype(np.uint8)
-        for t in tensor.flip(1)
-    ]
+    # 默认是RGB，flip(1)将3个通道翻转顺序变成BGR
+    # transpose(1, 2, 0)交换几个维度的顺序，将通道放在最后维
+    gts = [t.cpu().numpy().transpose(1, 2, 0).astype(np.uint8) for t in tensor.flip(1)]
+    # 维度
+    assert gts[0].shape == (5, 5, 3)
     outputs = mmcv.tensor2imgs(tensor, to_rgb=True)
     for gt, output in zip(gts, outputs):
         assert_array_equal(gt, output)
