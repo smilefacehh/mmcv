@@ -11,12 +11,16 @@ except ImportError:
     torch = None
 
 
+# 单元测试指令：pytest test_image_misc.py
+# 指定测试函数：pytest test_image_misc.py -k test_tensor2imgs
 @pytest.mark.skipif(torch is None, reason='requires torch library')
 def test_tensor2imgs():
 
+    print(1)
     # test tensor obj
     with pytest.raises(AssertionError):
         tensor = np.random.rand(2, 3, 3)
+        print(tensor)
         mmcv.tensor2imgs(tensor)
 
     # test tensor ndim
